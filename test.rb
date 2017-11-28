@@ -55,3 +55,4 @@ end
 
 p_type = Players::Player.detect_type(true)
 p = Players::Player.new(name: 'ipod', memory: 32, touch: p_type)
+puts p
