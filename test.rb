@@ -1,10 +1,21 @@
+# frozen_string_literal: true
+
 module Players
   class PlayerType
     attr_reader :name, :memory
 
+    DEFAULT_VALUES = {
+      name: 'ipod',
+      memory: 32
+    }.freeze
+
     def initialize(params = {})
       params.each do |key, value|
-        instance_variable_set("@#{key}", value) unless value.nil?
+        if value.nil?
+          instance_variable_set("@#{key}", DEFAULT_VALUES[key.to_sym])
+        else
+          instance_variable_set("@#{key}", value)
+        end
       end
     end
   end
@@ -25,13 +36,22 @@ module Players
     attr_reader :player_type
 
     def initialize(**args)
-      if args[:touch]
-        @player_type = PlayerTypeWithTouch.new(args)
+      @player_type = if args[:touch]
+                       PlayerTypeWithTouch.new(args)
+                     else
+                       PlayerTypeWithoutTouch.new(args)
+                     end
+    end
+
+    def self.detect_type(touch)
+      if touch
+        PlayerTypeWithTouch.class.name
       else
-        @player_type = PlayerTypeWithoutTouch.new(args)
+        PlayerTypeWithoutTouch.class.name
       end
     end
   end
 end
 
-p = Players::Player.new(name: 'ipod', memory: 32, touch: false)
+p_type = Players::Player.detect_type(true)
+p = Players::Player.new(name: 'ipod', memory: 32, touch: p_type)
